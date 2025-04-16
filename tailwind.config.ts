@@ -52,6 +52,22 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+                karma: {
+                    purple: {
+                        light: '#9b87f5',
+                        DEFAULT: '#7E69AB',
+                        dark: '#6E59A5',
+                    },
+                    gold: {
+                        light: '#FFD700',
+                        DEFAULT: '#D4AF37',
+                        dark: '#B8860B',
+                    },
+                    background: {
+                        light: '#F1F0FB', 
+                        dark: '#1A1F2C',
+                    },
+                },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

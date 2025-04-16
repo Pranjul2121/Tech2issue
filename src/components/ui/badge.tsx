@@ -15,6 +15,10 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        karma: 
+          "border-transparent bg-karma-purple-DEFAULT text-white hover:bg-karma-purple-DEFAULT/90",
+        gold: 
+          "border-transparent bg-karma-gold-DEFAULT text-black hover:bg-karma-gold-DEFAULT/90",
       },
     },
     defaultVariants: {
