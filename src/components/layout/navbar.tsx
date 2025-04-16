@@ -1,9 +1,21 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Award, Plus, User, Activity, Home } from "lucide-react";
+import { Award, Plus, User, Activity, Home, Wallet, LogOut } from "lucide-react";
+import { useWallet } from "@/hooks/useWallet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
+  const { address, isConnected, connectWallet, disconnectWallet, connecting } = useWallet();
+  
+  const shortenedAddress = address ? 
+    `${address.substring(0, 6)}...${address.substring(address.length - 4)}` : '';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -35,7 +47,30 @@ export function Navbar() {
             </Link>
           </nav>
           <div className="flex items-center space-x-2">
-            <Button variant="outline">Connect Wallet</Button>
+            {isConnected ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Wallet className="h-4 w-4" />
+                    {shortenedAddress}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={disconnectWallet}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Disconnect Wallet
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={connectWallet}
+                disabled={connecting}
+              >
+                {connecting ? "Connecting..." : "Connect Wallet"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
