@@ -1,8 +1,9 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { KarmaScoreCard } from "@/components/karma/karma-score-card";
-import { NFTCard } from "@/components/karma/nft-card";
+import { NFTCard, NFTProps } from "@/components/karma/nft-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,8 @@ import { toast } from "@/hooks/use-toast";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Sample data for demo purposes
-const userNFTs = [
+// Sample data for demo purposes - will be used as fallback if no localStorage data
+const sampleNFTs = [
   {
     id: "1",
     title: "Community Beach Cleanup",
@@ -102,6 +103,33 @@ const ProfilePage = () => {
   const [theme, setTheme] = useState("light");
   const [bio, setBio] = useState("Community volunteer passionate about making a difference through small, consistent acts of kindness.");
   
+  // NFT state
+  const [userNFTs, setUserNFTs] = useState<NFTProps[]>([]);
+  
+  // Load NFTs from localStorage on component mount
+  useEffect(() => {
+    const storedNFTs = localStorage.getItem('userNFTs');
+    if (storedNFTs) {
+      // Combine stored NFTs with sample NFTs
+      const parsedNFTs = JSON.parse(storedNFTs);
+      setUserNFTs([...parsedNFTs, ...sampleNFTs]);
+    } else {
+      // If no stored NFTs, use sample data
+      setUserNFTs(sampleNFTs);
+    }
+    
+    // Load user profile data if available
+    const storedProfile = localStorage.getItem('userProfile');
+    if (storedProfile) {
+      const profile = JSON.parse(storedProfile);
+      setUsername(profile.username || username);
+      setBio(profile.bio || bio);
+      setTheme(profile.theme || theme);
+      setProfileImage(profile.profileImage || profileImage);
+      setCustomImagePreview(profile.customImagePreview || null);
+    }
+  }, []);
+  
   // Edit profile dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -161,6 +189,15 @@ const ProfilePage = () => {
     setProfileImage(editProfileImage);
     setCustomImage(editCustomImage);
     setCustomImagePreview(editCustomImagePreview);
+    
+    // Save profile to localStorage
+    localStorage.setItem('userProfile', JSON.stringify({
+      username: editUsername,
+      bio: editBio,
+      theme: editTheme,
+      profileImage: editProfileImage,
+      customImagePreview: editCustomImagePreview
+    }));
     
     // Close dialog/drawer
     setDialogOpen(false);
@@ -433,31 +470,49 @@ const ProfilePage = () => {
               <Separator className="mb-6" />
               
               <TabsContent value="all" className="mt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {userNFTs.map((nft) => (
-                    <NFTCard key={nft.id} {...nft} />
-                  ))}
-                </div>
+                {userNFTs.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {userNFTs.map((nft) => (
+                      <NFTCard key={nft.id} {...nft} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-muted-foreground">No NFTs found. Submit a good deed to get started!</p>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="validated" className="mt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {userNFTs
-                    .filter((nft) => nft.status === "validated")
-                    .map((nft) => (
-                      <NFTCard key={nft.id} {...nft} />
-                    ))}
-                </div>
+                {userNFTs.filter((nft) => nft.status === "validated").length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {userNFTs
+                      .filter((nft) => nft.status === "validated")
+                      .map((nft) => (
+                        <NFTCard key={nft.id} {...nft} />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-muted-foreground">No validated NFTs found yet.</p>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="pending" className="mt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {userNFTs
-                    .filter((nft) => nft.status === "pending")
-                    .map((nft) => (
-                      <NFTCard key={nft.id} {...nft} />
-                    ))}
-                </div>
+                {userNFTs.filter((nft) => nft.status === "pending").length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {userNFTs
+                      .filter((nft) => nft.status === "pending")
+                      .map((nft) => (
+                        <NFTCard key={nft.id} {...nft} />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-muted-foreground">No pending NFTs found.</p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </div>

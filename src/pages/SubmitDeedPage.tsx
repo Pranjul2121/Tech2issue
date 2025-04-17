@@ -7,6 +7,7 @@ import { DeedForm } from "@/components/karma/deed-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NFTProps } from "@/components/karma/nft-card";
 
 const SubmitDeedPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,28 @@ const SubmitDeedPage = () => {
     try {
       // In a real app, this would send the data to an API or smart contract
       console.log("Submitting deed:", data);
+      
+      // Create a new NFT object from the submitted data
+      const newDeed: NFTProps = {
+        id: `deed-${Date.now()}`, // Generate a unique ID based on timestamp
+        title: data.title,
+        description: data.description,
+        imageUrl: data.image ? URL.createObjectURL(data.image) : "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80", // Default image if none provided
+        karmaPoints: Math.floor(Math.random() * 20) + 10, // Random points between 10-30 for demo
+        createdAt: "Just now",
+        location: data.location,
+        status: "pending" as const,
+        votes: 0,
+      };
+      
+      // Get existing user NFTs from localStorage or initialize empty array
+      const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+      
+      // Add new deed to the beginning of the array
+      const updatedNFTs = [newDeed, ...existingNFTs];
+      
+      // Save updated NFTs to localStorage
+      localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
       
       // For demo purposes, we'll just simulate a successful submission
       setIsSubmitted(true);

@@ -6,6 +6,7 @@ import { NFTProps } from "@/components/karma/nft-card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, HelpCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "@/hooks/use-toast";
 
 interface ValidationCardProps {
   deed: NFTProps;
@@ -24,12 +25,42 @@ export function ValidationCard({ deed, onValidate, userVoted = false }: Validati
     setIsLoading(true);
     setVote(isValid ? 'yes' : 'no');
     
-    // Simulate API call delay
-    setTimeout(() => {
+    try {
+      // Update deed status in localStorage if it exists there
+      const storedNFTs = localStorage.getItem('userNFTs');
+      if (storedNFTs) {
+        const nfts = JSON.parse(storedNFTs);
+        const updatedNFTs = nfts.map((nft: NFTProps) => {
+          if (nft.id === deed.id) {
+            return {
+              ...nft,
+              status: isValid ? "validated" as const : "rejected" as const,
+              votes: (nft.votes || 0) + 1
+            };
+          }
+          return nft;
+        });
+        localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+      }
+      
+      // Call the provided onValidate callback
       onValidate(deed.id, isValid);
       setHasVoted(true);
+      
+      toast({
+        title: "Vote recorded",
+        description: `You've ${isValid ? 'validated' : 'rejected'} this deed.`
+      });
+    } catch (error) {
+      console.error("Error updating deed status:", error);
+      toast({
+        title: "Error recording vote",
+        description: "There was an error processing your vote.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   // Simulated validation progress (in a real app, this would come from the blockchain)
