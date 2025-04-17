@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -104,6 +105,8 @@ const ProfilePage = () => {
   
   // NFT state
   const [userNFTs, setUserNFTs] = useState<NFTProps[]>([]);
+  // NFT count specifically for validated NFTs
+  const [nftCount, setNftCount] = useState(0);
   
   // Load NFTs from localStorage on component mount
   useEffect(() => {
@@ -126,8 +129,22 @@ const ProfilePage = () => {
       setTheme(profile.theme || theme);
       setProfileImage(profile.profileImage || profileImage);
       setCustomImagePreview(profile.customImagePreview || null);
+      
+      // Load NFT count from profile or calculate from validated NFTs as fallback
+      if (profile.nftCount !== undefined) {
+        setNftCount(profile.nftCount);
+      }
     }
   }, []);
+  
+  // Update NFT count whenever userNFTs changes
+  useEffect(() => {
+    if (!localStorage.getItem('userProfile')) {
+      // Only update count automatically if no stored profile exists
+      const validatedCount = userNFTs.filter(nft => nft.status === "validated").length;
+      setNftCount(validatedCount);
+    }
+  }, [userNFTs]);
   
   // Edit profile dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -189,8 +206,10 @@ const ProfilePage = () => {
     setCustomImage(editCustomImage);
     setCustomImagePreview(editCustomImagePreview);
     
-    // Save profile to localStorage
+    // Save profile to localStorage, preserving the NFT count
+    const storedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     localStorage.setItem('userProfile', JSON.stringify({
+      ...storedProfile,
       username: editUsername,
       bio: editBio,
       theme: editTheme,
@@ -218,14 +237,35 @@ const ProfilePage = () => {
   
   // Handle NFT deletion
   const handleDeleteNFT = (id: string) => {
+    // Find the NFT to check its status before removing
+    const nftToDelete = userNFTs.find(nft => nft.id === id);
+    const wasValidated = nftToDelete?.status === "validated";
+    
     // Filter out the NFT with the given id
     const updatedNFTs = userNFTs.filter(nft => nft.id !== id);
     setUserNFTs(updatedNFTs);
     
-    // Update localStorage
+    // Update localStorage for NFTs
     const storedNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
     const updatedStoredNFTs = storedNFTs.filter((nft: NFTProps) => nft.id !== id);
     localStorage.setItem('userNFTs', JSON.stringify(updatedStoredNFTs));
+    
+    // Update NFT count in profile if the deleted NFT was validated
+    if (wasValidated) {
+      // Get current profile data
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+      const currentNFTCount = userProfile.nftCount || nftCount;
+      
+      // Decrease the NFT count
+      const updatedNFTCount = Math.max(0, currentNFTCount - 1);
+      setNftCount(updatedNFTCount);
+      
+      // Update in localStorage
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...userProfile,
+        nftCount: updatedNFTCount
+      }));
+    }
   };
   
   // Edit profile component (shared between dialog and drawer)
@@ -451,7 +491,7 @@ const ProfilePage = () => {
               
               <KarmaScoreCard
                 score={totalKarmaPoints}
-                nftCount={validatedNFTCount}
+                nftCount={nftCount}
                 ranking={120}
                 lastAction="2 days ago"
                 username={username}

@@ -59,6 +59,9 @@ const SubmitDeedPage = () => {
             // Save updated NFTs to localStorage
             localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
             
+            // Update NFT count in the user profile
+            updateNFTCount(1);
+            
             // For demo purposes, we'll just simulate a successful submission
             setIsSubmitted(true);
             
@@ -90,6 +93,9 @@ const SubmitDeedPage = () => {
         // Save updated NFTs to localStorage
         localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
         
+        // Update NFT count in the user profile
+        updateNFTCount(1);
+        
         setIsSubmitted(true);
         setError(null);
       }
@@ -97,6 +103,19 @@ const SubmitDeedPage = () => {
       setError("There was an error submitting your deed. Please try again.");
       console.error(err);
     }
+  };
+
+  // Function to update NFT count in the user profile
+  const updateNFTCount = (increment: number) => {
+    // Get existing user profile or initialize with default values
+    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const currentNFTCount = userProfile.nftCount || 0;
+    
+    // Update the NFT count
+    userProfile.nftCount = currentNFTCount + increment;
+    
+    // Save updated profile to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(userProfile));
   };
 
   return (

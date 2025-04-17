@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Clock, MapPin, Medal, ThumbsUp, User, Trash2 } from "lucide-react";
