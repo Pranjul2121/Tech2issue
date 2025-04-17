@@ -28,37 +28,71 @@ const SubmitDeedPage = () => {
       
       // Create URL for image if provided
       let imageUrl = "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80";
+      
+      // Handle the image properly
       if (data.image) {
-        imageUrl = URL.createObjectURL(data.image);
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            // Store the image data as base64 string
+            const imageData = event.target.result as string;
+            
+            // Create a new NFT object with base64 image data
+            const newDeed: NFTProps = {
+              id: uniqueId,
+              title: data.title,
+              description: data.description,
+              imageUrl: imageData, 
+              karmaPoints: Math.floor(Math.random() * 20) + 10, // Random points between 10-30 for demo
+              createdAt: "Just now",
+              location: data.location,
+              status: "pending" as const,
+              votes: 0,
+            };
+            
+            // Get existing user NFTs from localStorage or initialize empty array
+            const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+            
+            // Add new deed to the beginning of the array
+            const updatedNFTs = [newDeed, ...existingNFTs];
+            
+            // Save updated NFTs to localStorage
+            localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+            
+            // For demo purposes, we'll just simulate a successful submission
+            setIsSubmitted(true);
+            
+            // Reset any previous errors
+            setError(null);
+          }
+        };
+        reader.readAsDataURL(data.image);
+      } else {
+        // Handle the case where no image is provided
+        const newDeed: NFTProps = {
+          id: uniqueId,
+          title: data.title,
+          description: data.description,
+          imageUrl: imageUrl, 
+          karmaPoints: Math.floor(Math.random() * 20) + 10,
+          createdAt: "Just now",
+          location: data.location,
+          status: "pending" as const,
+          votes: 0,
+        };
+        
+        // Get existing user NFTs from localStorage or initialize empty array
+        const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+        
+        // Add new deed to the beginning of the array
+        const updatedNFTs = [newDeed, ...existingNFTs];
+        
+        // Save updated NFTs to localStorage
+        localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
+        
+        setIsSubmitted(true);
+        setError(null);
       }
-      
-      // Create a new NFT object from the submitted data
-      const newDeed: NFTProps = {
-        id: uniqueId,
-        title: data.title,
-        description: data.description,
-        imageUrl: imageUrl, 
-        karmaPoints: Math.floor(Math.random() * 20) + 10, // Random points between 10-30 for demo
-        createdAt: "Just now",
-        location: data.location,
-        status: "pending" as const,
-        votes: 0,
-      };
-      
-      // Get existing user NFTs from localStorage or initialize empty array
-      const existingNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
-      
-      // Add new deed to the beginning of the array
-      const updatedNFTs = [newDeed, ...existingNFTs];
-      
-      // Save updated NFTs to localStorage
-      localStorage.setItem('userNFTs', JSON.stringify(updatedNFTs));
-      
-      // For demo purposes, we'll just simulate a successful submission
-      setIsSubmitted(true);
-      
-      // Reset any previous errors
-      setError(null);
     } catch (err) {
       setError("There was an error submitting your deed. Please try again.");
       console.error(err);

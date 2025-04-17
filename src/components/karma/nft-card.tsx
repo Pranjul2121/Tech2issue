@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Clock, MapPin, Medal, ThumbsUp, User, Trash2 } from "lucide-react";
@@ -53,13 +52,31 @@ export function NFTCard({
     }
   };
 
+  // Function to check if image URL is valid
+  const isValidImage = (url: string) => {
+    return url && (
+      url.startsWith('http') || 
+      url.startsWith('https') || 
+      url.startsWith('data:image')
+    );
+  };
+
+  // Use a fallback image if the provided URL is invalid
+  const imageSource = isValidImage(imageUrl) 
+    ? imageUrl 
+    : "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80";
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
         <img 
-          src={imageUrl} 
+          src={imageSource} 
           alt={title}
           className="w-full h-48 object-cover"
+          onError={(e) => {
+            // Set a fallback image if the image fails to load
+            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80";
+          }}
         />
         <div className="absolute top-2 right-2 flex gap-2">
           {onDelete && (
