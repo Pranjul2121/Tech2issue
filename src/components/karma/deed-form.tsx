@@ -33,13 +33,17 @@ export function DeedForm({ onSubmit }: DeedFormProps) {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImage(file);
+      const selectedFile = e.target.files[0];
+      setImage(selectedFile);
+      
+      // Create a preview URL for the selected image
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setImagePreview(event.target.result as string);
+        }
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(selectedFile);
     }
   };
 
@@ -93,14 +97,14 @@ export function DeedForm({ onSubmit }: DeedFormProps) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="image">Upload Proof (Image/Video)</Label>
+            <Label htmlFor="image-upload">Upload Proof (Image/Video)</Label>
             <div className={`border-2 border-dashed rounded-lg p-6 ${imagePreview ? 'border-karma-purple' : 'border-muted'}`}>
               {imagePreview ? (
                 <div className="relative">
                   <img 
                     src={imagePreview} 
                     alt="Preview" 
-                    className="max-h-64 mx-auto rounded-md"
+                    className="max-h-64 mx-auto rounded-md object-contain"
                   />
                   <Button
                     type="button"
@@ -110,24 +114,27 @@ export function DeedForm({ onSubmit }: DeedFormProps) {
                     onClick={() => {
                       setImage(null);
                       setImagePreview(null);
+                      // Reset the file input
+                      const fileInput = document.getElementById('image-upload') as HTMLInputElement;
+                      if (fileInput) fileInput.value = '';
                     }}
                   >
                     Change
                   </Button>
                 </div>
               ) : (
-                <div className="text-center">
+                <label 
+                  htmlFor="image-upload" 
+                  className="cursor-pointer flex flex-col items-center justify-center text-center"
+                >
                   <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                  <Label 
-                    htmlFor="image-upload" 
-                    className="cursor-pointer text-primary hover:text-primary/80"
-                  >
+                  <span className="text-primary hover:text-primary/80">
                     Click to upload or drag and drop
-                  </Label>
+                  </span>
                   <p className="text-xs text-muted-foreground mt-1">
                     PNG, JPG, GIF, MP4 up to 10MB
                   </p>
-                </div>
+                </label>
               )}
               <Input 
                 id="image-upload"
