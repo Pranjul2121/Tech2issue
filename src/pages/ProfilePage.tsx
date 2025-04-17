@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -216,6 +215,18 @@ const ProfilePage = () => {
   // Get current display image (custom upload or selected preset)
   const currentDisplayImage = customImagePreview || profileImage;
   const editDisplayImage = editCustomImagePreview || editProfileImage;
+  
+  // Handle NFT deletion
+  const handleDeleteNFT = (id: string) => {
+    // Filter out the NFT with the given id
+    const updatedNFTs = userNFTs.filter(nft => nft.id !== id);
+    setUserNFTs(updatedNFTs);
+    
+    // Update localStorage
+    const storedNFTs = JSON.parse(localStorage.getItem('userNFTs') || '[]');
+    const updatedStoredNFTs = storedNFTs.filter((nft: NFTProps) => nft.id !== id);
+    localStorage.setItem('userNFTs', JSON.stringify(updatedStoredNFTs));
+  };
   
   // Edit profile component (shared between dialog and drawer)
   const EditProfileContent = (
@@ -473,7 +484,11 @@ const ProfilePage = () => {
                 {userNFTs.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {userNFTs.map((nft) => (
-                      <NFTCard key={nft.id} {...nft} />
+                      <NFTCard 
+                        key={nft.id} 
+                        {...nft} 
+                        onDelete={handleDeleteNFT}
+                      />
                     ))}
                   </div>
                 ) : (
@@ -489,7 +504,11 @@ const ProfilePage = () => {
                     {userNFTs
                       .filter((nft) => nft.status === "validated")
                       .map((nft) => (
-                        <NFTCard key={nft.id} {...nft} />
+                        <NFTCard 
+                          key={nft.id} 
+                          {...nft} 
+                          onDelete={handleDeleteNFT}
+                        />
                       ))}
                   </div>
                 ) : (
@@ -505,7 +524,11 @@ const ProfilePage = () => {
                     {userNFTs
                       .filter((nft) => nft.status === "pending")
                       .map((nft) => (
-                        <NFTCard key={nft.id} {...nft} />
+                        <NFTCard 
+                          key={nft.id} 
+                          {...nft} 
+                          onDelete={handleDeleteNFT}
+                        />
                       ))}
                   </div>
                 ) : (

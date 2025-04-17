@@ -1,7 +1,20 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Clock, MapPin, Medal, ThumbsUp, User } from "lucide-react";
+import { Clock, MapPin, Medal, ThumbsUp, User, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/hooks/use-toast";
 
 export interface NFTProps {
   id: string;
@@ -14,6 +27,7 @@ export interface NFTProps {
   status: "pending" | "validated" | "rejected";
   votes?: number;
   owner?: string;
+  onDelete?: (id: string) => void;
 }
 
 export function NFTCard({
@@ -26,8 +40,19 @@ export function NFTCard({
   location,
   status,
   votes = 0,
-  owner
+  owner,
+  onDelete
 }: NFTProps) {
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(id);
+      toast({
+        title: "Deed deleted",
+        description: "Your deed has been successfully deleted.",
+      });
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
@@ -36,7 +61,29 @@ export function NFTCard({
           alt={title}
           className="w-full h-48 object-cover"
         />
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 flex gap-2">
+          {onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="h-7 w-7 p-0">
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your deed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Badge 
             variant={status === "validated" ? "default" : status === "pending" ? "outline" : "destructive"}
             className={status === "validated" ? "bg-karma-purple-DEFAULT text-white" : ""}

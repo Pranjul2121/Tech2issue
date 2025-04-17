@@ -21,15 +21,23 @@ const SubmitDeedPage = () => {
     location: string;
   }) => {
     try {
-      // In a real app, this would send the data to an API or smart contract
       console.log("Submitting deed:", data);
+      
+      // Generate unique ID using timestamp + random string
+      const uniqueId = `deed-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create URL for image if provided
+      let imageUrl = "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80";
+      if (data.image) {
+        imageUrl = URL.createObjectURL(data.image);
+      }
       
       // Create a new NFT object from the submitted data
       const newDeed: NFTProps = {
-        id: `deed-${Date.now()}`, // Generate a unique ID based on timestamp
+        id: uniqueId,
         title: data.title,
         description: data.description,
-        imageUrl: data.image ? URL.createObjectURL(data.image) : "https://images.unsplash.com/photo-1611329532992-0b7b3100daa7?auto=format&fit=crop&q=80", // Default image if none provided
+        imageUrl: imageUrl, 
         karmaPoints: Math.floor(Math.random() * 20) + 10, // Random points between 10-30 for demo
         createdAt: "Just now",
         location: data.location,
