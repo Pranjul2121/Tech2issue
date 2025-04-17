@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -15,7 +14,7 @@ import { Copy, ExternalLink, Award, Edit, Check, Upload } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { useMedia } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Sample data for demo purposes
 const userNFTs = [
@@ -93,7 +92,7 @@ const themeOptions = [
 ];
 
 const ProfilePage = () => {
-  const isMobile = useMedia("(max-width: 640px)");
+  const isMobile = useIsMobile();
   
   // User profile state
   const [username, setUsername] = useState("KarmaUser");
